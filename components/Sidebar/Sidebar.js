@@ -29,7 +29,7 @@ const menuItems = [
 
 export default function Sidebar() {
   return (
-    <div className="fixed flex-col hidden h-full p-2 sm:flex xl:items-start">
+    <div className="fixed flex-col hidden h-full p-2 sm:flex xl:items-start xl:ml-20">
       {/* TWITTER LOGO */}
       <div>
         <Image
