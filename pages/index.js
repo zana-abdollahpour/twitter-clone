@@ -4,7 +4,7 @@ import Feed from "../components/Feed/Feed";
 import Sidebar from "../components/Sidebar/Sidebar";
 import Widgets from "../components/Widgets/Widgets";
 
-export default function Home() {
+export default function Home({ newsResults }) {
   return (
     <>
       <Head>
@@ -21,10 +21,21 @@ export default function Home() {
         <Feed />
 
         {/* WIDGETS */}
-        <Widgets />
+        <Widgets newsResults={newsResults.articles} />
 
         {/* MODAL */}
       </main>
     </>
   );
+}
+
+export async function getServerSideProps() {
+  const newsUrl =
+    "https://saurav.tech/NewsAPI/top-headlines/category/business/us.json";
+  const newsResults = await fetch(newsUrl)
+    .then((res) => res.json())
+    .catch((error) => console.log(error));
+  return {
+    props: { newsResults },
+  };
 }
