@@ -1,5 +1,6 @@
 import React from "react";
 import Image from "next/image";
+import { useSession, signIn, signOut } from "next-auth/react";
 
 import SidebarMenuItem from "./SidebarMenuItem";
 
@@ -14,20 +15,20 @@ import { UserIcon } from "@heroicons/react/24/outline";
 import { EllipsisHorizontalCircleIcon } from "@heroicons/react/24/outline";
 import { EllipsisHorizontalIcon } from "@heroicons/react/24/outline";
 
-import myImg from "../../public/images/me.png";
-
 const menuItems = [
-  { text: "Home", Icon: HomeIcon, active: true },
-  { text: "Explore", Icon: HashtagIcon },
-  { text: "Notifications", Icon: BellIcon },
-  { text: "Messages", Icon: InboxIcon },
-  { text: "Bookmarks", Icon: BookmarkIcon },
-  { text: "Lists", Icon: ClipboardIcon },
-  { text: "Profile", Icon: UserIcon },
-  { text: "More", Icon: EllipsisHorizontalCircleIcon },
+  { text: "Home", Icon: HomeIcon, active: true, protected: false },
+  { text: "Explore", Icon: HashtagIcon, protected: false },
+  { text: "Notifications", Icon: BellIcon, protected: true },
+  { text: "Messages", Icon: InboxIcon, protected: true },
+  { text: "Bookmarks", Icon: BookmarkIcon, protected: true },
+  { text: "Lists", Icon: ClipboardIcon, protected: true },
+  { text: "Profile", Icon: UserIcon, protected: true },
+  { text: "More", Icon: EllipsisHorizontalCircleIcon, protected: true },
 ];
 
 export default function Sidebar() {
+  const { data: session } = useSession();
+
   return (
     <div className="fixed flex-col hidden h-full p-2 sm:flex xl:items-start xl:ml-20">
       {/* TWITTER LOGO */}
@@ -44,35 +45,51 @@ export default function Sidebar() {
       {/* MENU */}
       <div className="mt-4 mb-2.5 xl:items-start">
         {menuItems.map((item) => (
-          <SidebarMenuItem
-            key={item.text}
-            text={item.text}
-            Icon={item.Icon}
-            active={item.active}
-          />
+          <>
+            {!item.protected || (session && item.protected) ? (
+              <SidebarMenuItem
+                key={item.text}
+                text={item.text}
+                Icon={item.Icon}
+                active={item.active}
+              />
+            ) : null}
+          </>
         ))}
       </div>
 
-      {/* BUTTON */}
-      <button className="hidden w-56 h-10 text-lg font-bold text-white bg-blue-400 rounded-full shadow-md hover:brightness-90 xl:inline">
-        Tweet
-      </button>
+      {session ? (
+        <>
+          {/* BUTTON */}
+          <button className="hidden w-56 h-10 text-lg font-bold text-white bg-blue-400 rounded-full shadow-md hover:brightness-90 xl:inline">
+            Tweet
+          </button>
 
-      {/* MINI-PROFILE */}
-      <div className="flex items-center justify-center w-12 h-12 mt-auto text-gray-700 rounded-full cursor-pointer xl:justify-start hover:bg-gray-200 xl:w-auto xl:h-auto xl:p-3">
-        <Image
-          src={myImg}
-          alt="profile Image"
-          width="40"
-          height="40"
-          className="rounded-full xl:mr-2"
-        />
-        <div className="hidden leading-5 xl:inline">
-          <h4 className="font-bold">Zana Abdollahpour</h4>
-          <p className="text-gray-500">@Zana_AP</p>
-        </div>
-        <EllipsisHorizontalIcon className="hidden h-5 xl:ml-8 xl:inline" />
-      </div>
+          {/* MINI-PROFILE */}
+          <div className="flex items-center justify-center w-12 h-12 mt-auto text-gray-700 rounded-full cursor-pointer xl:justify-start hover:bg-gray-200 xl:w-auto xl:h-auto xl:p-3">
+            <Image
+              onClick={signOut}
+              src={session.user.userImage}
+              alt="profile Image"
+              width="40"
+              height="40"
+              className="rounded-full xl:mr-2"
+            />
+            <div className="hidden leading-5 xl:inline">
+              <h4 className="font-bold">{session.user.name}</h4>
+              <p className="text-gray-500">@{session.user.username}</p>
+            </div>
+            <EllipsisHorizontalIcon className="hidden h-5 xl:ml-8 xl:inline" />
+          </div>
+        </>
+      ) : (
+        <button
+          onClick={signIn}
+          className="hidden h-10 text-lg font-bold text-white bg-blue-400 rounded-full shadow-md w-36 hover:brightness-90 xl:inline"
+        >
+          Sign in
+        </button>
+      )}
     </div>
   );
 }
